@@ -143,18 +143,38 @@ foreach ($repoName in $TargetRepos) {
     $hasCsproj = Get-ChildItem -Path $repoPath -Filter "*.csproj" -Recurse -Depth 2
     $hasDocker = (Test-Path (Join-Path $repoPath "docker-compose.yml")) -or (Test-Path (Join-Path $repoPath "Dockerfile"))
 
-    $depEcosystems = @(
-        '  - package-ecosystem: "npm"' + "`n" + '    directory: "/"' + "`n" + '    schedule:' + "`n" + '      interval: "weekly"',
-        '  - package-ecosystem: "github-actions"' + "`n" + '    directory: "/"' + "`n" + '    schedule:' + "`n" + '      interval: "weekly"'
+    $blocks = @(
+@"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"@,
+@"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"@
     )
     if ($hasCsproj) {
-        $depEcosystems += '  - package-ecosystem: "nuget"' + "`n" + '    directory: "/"' + "`n" + '    schedule:' + "`n" + '      interval: "weekly"'
+        $blocks += @"
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"@
     }
     if ($hasDocker) {
-        $depEcosystems += '  - package-ecosystem: "docker"' + "`n" + '    directory: "/"' + "`n" + '    schedule:' + "`n" + '      interval: "weekly"'
+        $blocks += @"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"@
     }
 
-    $dependabotYaml = "version: 2`nupdates:`n" + ($depEcosystems -join "`n") + "`n"
+    $dependabotYaml = "version: 2`nupdates:`n" + ($blocks -join "`n") + "`n"
     $depDest = Join-Path $repoPath ".github/dependabot.yml"
     if (-not $DryRun) {
         Set-Content -Path $depDest -Value $dependabotYaml -Encoding UTF8

@@ -5,6 +5,7 @@ Welcome to the official GitHub Discussions forum for this repository!
 ## 🚀 Purpose
 
 This space is dedicated to:
+
 - **Questions & Answers**: Get help using, configuring, or extending this project.
 - **Ideas & Feature Requests**: Propose enhancements, workflow improvements, or new capabilities.
 - **Announcements**: Stay updated on releases, major updates, and architecture specs.
