@@ -191,8 +191,7 @@ foreach ($repoName in $TargetRepos) {
     if ($ApplyRemoteSettings) {
         Write-Host "  [REMOTE] Applying GitHub remote settings for CTOUT/${repoName}..." -ForegroundColor Yellow
         try {
-            $wikiFlag = if ($repoName -eq "WT2Wiki") { "--enable-wiki" } else { "--enable-wiki=false" }
-            gh repo edit "CTOUT/${repoName}" --enable-discussions --enable-issues --delete-branch-on-merge --enable-squash-merge $wikiFlag
+            gh repo edit "CTOUT/${repoName}" --enable-discussions --enable-issues --delete-branch-on-merge --enable-squash-merge --enable-wiki=false
             Write-Host "  [REMOTE ✅] Settings applied successfully for CTOUT/${repoName}" -ForegroundColor Green
         } catch {
             Write-Warning "  Remote settings failed for CTOUT/${repoName}: $_"
