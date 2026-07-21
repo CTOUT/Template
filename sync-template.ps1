@@ -3,16 +3,19 @@
     Template-as-Code synchronization script for GitHub repositories.
 .DESCRIPTION
     Audits and synchronizes repository documentation, linter configs, GitHub Actions workflows,
-    copilot instructions, and cspell settings across repositories in d:\Repos\GitHub against the Template repository.
+    discussion templates, copilot instructions, and cspell settings across repositories in d:\Repos\GitHub against the Template repository.
 #>
 
 [CmdletBinding()]
 param(
     [switch]$DryRun,
+    [switch]$ApplyRemoteSettings,
     [string[]]$TargetRepos
 )
 
 $ErrorActionPreference = 'Stop'
+$env:GITHUB_TOKEN = $null
+Remove-Item env:GITHUB_TOKEN -ErrorAction SilentlyContinue
 
 $templateDir = $PSScriptRoot
 $workspaceRoot = Split-Path -Parent $templateDir
@@ -51,6 +54,8 @@ $baselineDocs = @(
 # Standard workflows and templates to sync
 $workflows = @(
     ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/DISCUSSION_TEMPLATE/welcome-and-qa.yml",
+    ".github/DISCUSSION_TEMPLATE/ideas-and-feature-requests.yml",
     ".github/workflows/cleanup.yml",
     ".github/workflows/gitleaks.yml",
     ".github/workflows/format.yml",
@@ -111,9 +116,7 @@ foreach ($repoName in $TargetRepos) {
     $copilotDest = Join-Path $repoPath ".github/copilot-instructions.md"
     if ((Test-Path $copilotSrc) -and (-not (Test-Path $copilotDest))) {
         $destDir = Split-Path -Parent $copilotDest
-        if (-not (Test-Path $destDir)) {
-            if (-not $DryRun) { New-Item -Path $destDir -ItemType Directory -Force | Out-Null }
-        }
+        if (-not $DryRun) { New-Item -Path $destDir -ItemType Directory -Force | Out-Null }
         if (-not $DryRun) { Copy-Item -Path $copilotSrc -Destination $copilotDest -Force }
         Write-Host "  [CREATE] .github/copilot-instructions.md" -ForegroundColor Cyan
     }
@@ -181,6 +184,18 @@ foreach ($repoName in $TargetRepos) {
             Write-Host "  [SORT/STANDARDIZE] cspell.json (en-GB, sorted words)" -ForegroundColor Gray
         } catch {
             Write-Warning "  Failed to format cspell.json for ${repoName}: $_"
+        }
+    }
+
+    # 8. Apply Remote GitHub Settings (if -ApplyRemoteSettings flag passed)
+    if ($ApplyRemoteSettings) {
+        Write-Host "  [REMOTE] Applying GitHub remote settings for CTOUT/${repoName}..." -ForegroundColor Yellow
+        try {
+            $wikiFlag = if ($repoName -eq "WT2Wiki") { "--enable-wiki" } else { "--enable-wiki=false" }
+            gh repo edit "CTOUT/${repoName}" --enable-discussions --enable-issues --delete-branch-on-merge --enable-squash-merge $wikiFlag
+            Write-Host "  [REMOTE ✅] Settings applied successfully for CTOUT/${repoName}" -ForegroundColor Green
+        } catch {
+            Write-Warning "  Remote settings failed for CTOUT/${repoName}: $_"
         }
     }
 }
