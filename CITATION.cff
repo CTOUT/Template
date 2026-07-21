@@ -3,6 +3,6 @@ title: "Repository Template"
 message: "If you use this software, please cite it as below."
 type: software
 authors:
-    - family-names: "Maintainer"
-      given-names: "Repository"
+  - family-names: "Maintainer"
+    given-names: "Repository"
 license: MIT
