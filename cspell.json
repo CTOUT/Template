@@ -1,0 +1,15 @@
+{
+  "version": "0.2",
+  "language": "en-GB",
+  "useGitignore": true,
+  "ignorePaths": ["node_modules", "package-lock.json", ".git", "bin", "obj"],
+  "words": [
+    "autocleaning",
+    "backbuffer",
+    "dependabot",
+    "frontmatter",
+    "gitleaks",
+    "llms",
+    "markdownlint"
+  ]
+}
