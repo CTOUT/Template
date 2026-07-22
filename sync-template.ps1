@@ -175,7 +175,7 @@ foreach ($repoName in $TargetRepos) {
 "@
     }
 
-    $dependabotYaml = "version: 2`nupdates:`n" + ($blocks -join "`n") + "`n"
+    $dependabotYaml = "version: 2`n" + "updates:`n" + ($blocks -join "`n") + "`n"
     $depDest = Join-Path $repoPath ".github/dependabot.yml"
     if (-not $DryRun) {
         [System.IO.File]::WriteAllText($depDest, $dependabotYaml.Replace("`r`n", "`n"))
