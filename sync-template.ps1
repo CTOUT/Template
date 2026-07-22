@@ -202,6 +202,7 @@ foreach ($repoName in $TargetRepos) {
                 $formattedJson = $cspellObj | ConvertTo-Json -Depth 10
                 $formattedJson = $formattedJson.Replace("`r`n", "`n")
                 [System.IO.File]::WriteAllText($cspellPath, $formattedJson + "`n")
+                npx prettier --write "$cspellPath" 2>$null
             }
             Write-Host "  [SORT/STANDARDIZE] cspell.json (en-GB, sorted words)" -ForegroundColor Gray
         } catch {
