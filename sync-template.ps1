@@ -39,7 +39,8 @@ $syncConfigs = @(
     ".prettierrc",
     ".prettierignore",
     ".markdownlint.json",
-    ".markdownlintignore"
+    ".markdownlintignore",
+    "CITATION.cff"
 )
 
 # Baseline docs to copy if missing
@@ -177,7 +178,7 @@ foreach ($repoName in $TargetRepos) {
     $dependabotYaml = "version: 2`nupdates:`n" + ($blocks -join "`n") + "`n"
     $depDest = Join-Path $repoPath ".github/dependabot.yml"
     if (-not $DryRun) {
-        Set-Content -Path $depDest -Value $dependabotYaml -Encoding UTF8
+        [System.IO.File]::WriteAllText($depDest, $dependabotYaml.Replace("`r`n", "`n"))
     }
     Write-Host "  [SYNC TAILORED] .github/dependabot.yml" -ForegroundColor Gray
 
@@ -199,11 +200,32 @@ foreach ($repoName in $TargetRepos) {
             }
             if (-not $DryRun) {
                 $formattedJson = $cspellObj | ConvertTo-Json -Depth 10
-                Set-Content -Path $cspellPath -Value $formattedJson -Encoding UTF8
+                $formattedJson = $formattedJson.Replace("`r`n", "`n")
+                [System.IO.File]::WriteAllText($cspellPath, $formattedJson + "`n")
             }
             Write-Host "  [SORT/STANDARDIZE] cspell.json (en-GB, sorted words)" -ForegroundColor Gray
         } catch {
             Write-Warning "  Failed to format cspell.json for ${repoName}: $_"
+        }
+    }
+
+    # 8. LF Line Ending Normalization for Synced Files
+    if (-not $DryRun) {
+        $lfFiles = @(
+            (Join-Path $repoPath ".github/dependabot.yml"),
+            (Join-Path $repoPath "CITATION.cff"),
+            (Join-Path $repoPath ".editorconfig"),
+            (Join-Path $repoPath ".gitattributes"),
+            (Join-Path $repoPath ".prettierrc"),
+            (Join-Path $repoPath ".prettierignore"),
+            (Join-Path $repoPath ".markdownlint.json"),
+            (Join-Path $repoPath ".markdownlintignore")
+        )
+        foreach ($lfFile in $lfFiles) {
+            if (Test-Path $lfFile) {
+                $text = [System.IO.File]::ReadAllText($lfFile).Replace("`r`n", "`n")
+                [System.IO.File]::WriteAllText($lfFile, $text)
+            }
         }
     }
 
