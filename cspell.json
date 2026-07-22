@@ -12,8 +12,12 @@
     "public",
     "output",
     "scratch",
+    "api/data",
+    "api/private_assets",
     "*.cjs",
-    "*.txt"
+    "*.txt",
+    "*.tf",
+    "*.json"
   ],
   "words": [
     "analyzer",
