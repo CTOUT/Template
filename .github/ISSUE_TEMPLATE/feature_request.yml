@@ -1,0 +1,45 @@
+name: Feature Request
+description: Propose a new feature, enhancement, or architectural improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Proposing an Improvement or Feature
+        Thank you for suggesting an improvement! Please outline the motivation, user story, and expected outcome.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement / Motivation
+      description: What pain point, limitation, or gap does this proposal address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the desired behaviour, technical approach, or design pattern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative designs, libraries, or workarounds you considered.
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context (Optional)
+      description: Add diagrams, references, related issues, or specifications.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Submission Checklist
+      options:
+        - label: I have searched existing issues and discussions to ensure this is not already planned.
+          required: true

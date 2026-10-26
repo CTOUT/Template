@@ -1,0 +1,78 @@
+name: Bug Report
+description: Report a defect or unexpected behaviour
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Reporting a Defect or Unexpected Behaviour
+        Thank you for reporting an issue! Please provide as much detail as possible so we can diagnose and resolve it quickly.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity / Impact
+      description: How severely does this issue impact operation?
+      options:
+        - "Critical / Crash / Blocker (System inoperable or data loss)"
+        - "Major (Key feature broken or unusable)"
+        - "Minor (Visual glitch, unexpected edge case, minor friction)"
+        - "Trivial (Typo, cosmetic suggestion)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Bug
+      description: A clear and concise explanation of what happened.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Run command '...'
+        2. Provide input '...'
+        3. Observe error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment & Versions
+      description: OS version, runtime/tool versions, and architecture.
+      placeholder: |
+        - OS: Windows 11 / WSL2 / Linux
+        - Runtime / Tool Version:
+        - Commit / Release:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Stacktrace (Optional)
+      description: Paste relevant terminal logs, stack traces, or diagnostic output.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate.
+          required: true
+        - label: I am running the latest version / release of the project.
+          required: true

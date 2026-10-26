@@ -140,17 +140,33 @@ foreach ($repoName in $TargetRepos) {
         }
     }
 
+    # 5.1 Sync GitHub Issue Templates if missing
+    $issueTemplates = @(
+        ".github/ISSUE_TEMPLATE/config.yml",
+        ".github/ISSUE_TEMPLATE/bug_report.yml",
+        ".github/ISSUE_TEMPLATE/feature_request.yml"
+    )
+    foreach ($relPath in $issueTemplates) {
+        $src = Join-Path $templateDir $relPath
+        $dest = Join-Path $repoPath $relPath
+        if ((Test-Path $src) -and (-not (Test-Path $dest))) {
+            $destDir = Split-Path -Parent $dest
+            if (-not (Test-Path $destDir) -and (-not $DryRun)) {
+                New-Item -Path $destDir -ItemType Directory -Force | Out-Null
+            }
+            if (-not $DryRun) {
+                Copy-Item -Path $src -Destination $dest -Force
+            }
+            Write-Host "  [CREATE] $relPath" -ForegroundColor Cyan
+        }
+    }
+
     # 6. Tailored Dependabot configuration (.github/dependabot.yml)
-    $hasCsproj = Get-ChildItem -Path $repoPath -Filter "*.csproj" -Recurse -Depth 2
+    $hasNpm = Test-Path (Join-Path $repoPath "package.json")
+    $hasCsproj = Get-ChildItem -Path $repoPath -Filter "*.csproj" -Recurse -Depth 2 -ErrorAction SilentlyContinue
     $hasDocker = (Test-Path (Join-Path $repoPath "docker-compose.yml")) -or (Test-Path (Join-Path $repoPath "Dockerfile"))
 
     $blocks = @(
-@"
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-"@,
 @"
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -158,6 +174,14 @@ foreach ($repoName in $TargetRepos) {
       interval: "weekly"
 "@
     )
+    if ($hasNpm) {
+        $blocks += @"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"@
+    }
     if ($hasCsproj) {
         $blocks += @"
   - package-ecosystem: "nuget"
