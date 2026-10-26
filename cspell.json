@@ -20,7 +20,6 @@
     "*.json"
   ],
   "words": [
-    "agentsmith",
     "analyzer",
     "autocleaning",
     "backbuffer",
@@ -28,7 +27,6 @@
     "dependabot",
     "frontmatter",
     "gitleaks",
-    "kiro",
     "linters",
     "llms",
     "markdownlint",
