@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Template-as-Code synchronization script for GitHub repositories.
 .DESCRIPTION
@@ -22,7 +22,15 @@ $workspaceRoot = Split-Path -Parent $templateDir
 
 if (-not $TargetRepos -or $TargetRepos.Count -eq 0) {
     $TargetRepos = Get-ChildItem -Path $workspaceRoot -Directory | 
-        Where-Object { $_.Name -ne 'Template' -and $_.Name -ne '.agents' -and $_.Name -ne '.vscode' -and $_.Name -ne 'scratch' -and $_.Name -ne 'docs' } |
+        Where-Object {
+            $_.Name -ne 'Template' -and
+            $_.Name -ne '.agents' -and
+            $_.Name -ne '.vscode' -and
+            $_.Name -ne 'scratch' -and
+            $_.Name -ne 'docs' -and
+            (Test-Path (Join-Path $_.FullName '.git')) -and
+            ((git -C $_.FullName remote get-url origin 2>$null) -match 'CTOUT/')
+        } |
         Select-Object -ExpandProperty Name
 }
 
@@ -45,6 +53,7 @@ $syncConfigs = @(
 
 # Baseline docs to copy if missing
 $baselineDocs = @(
+    ".gitignore",
     "CONTRIBUTING.md",
     "SECURITY.md",
     "CITATION.cff",

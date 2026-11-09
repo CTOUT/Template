@@ -1,0 +1,56 @@
+# Build and output directories
+bin/
+obj/
+dist/
+build/
+output/
+
+# Node & npm tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# IDE and Editor artefacts
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.user
+*.suo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary and scratch files
+*.tmp
+*.bak
+*.swp
+scratch_*
+scratch/
+
+# Local AI / Copilot subscriptions, IDEs & handoff state
+.github/.copilot-subscriptions.json
+.github/agents/
+.github/instructions/
+.github/skills/
+.github/hooks/
+.github/plugin/
+.github/workflows/*.md
+.agents/
+.kiro/
+.claude/
+.cursor/
+.cursorrules
+.gemini/
+.handoff_pending
+
