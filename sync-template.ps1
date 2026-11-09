@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Template-as-Code synchronization script for GitHub repositories.
 .DESCRIPTION
