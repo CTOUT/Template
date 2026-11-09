@@ -1,7 +1,8 @@
 # Repository Orientation for LLMs
 
 This repository follows standard project layout guidelines:
-- Documentation files: README.md, TODO.md, CHANGELOG.md, CONTRIBUTING.md, SECURITY.md.
-- Configuration: .editorconfig, .gitattributes, .prettierrc, .markdownlint.json, cspell.json.
-- Workflows: .github/workflows for CI/CD, linting, formatting, secret scanning, and run cleanup.
-- Language standard: en-GB spelling enforced in cspell.json with alphabetically sorted custom words.
+- Documentation files: README.md, TODO.md, CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CITATION.cff.
+- Configuration: .editorconfig, .gitattributes, .gitignore, .prettierrc, .prettierignore, .markdownlint.json, .markdownlintignore, cspell.json.
+- GitHub governance & AI steering: .github/copilot-instructions.md, .github/dependabot.yml, .github/PULL_REQUEST_TEMPLATE.md, .github/ISSUE_TEMPLATE/, .github/DISCUSSION_TEMPLATE/.
+- Workflows: .github/workflows for CI/CD (format.yml, spellcheck.yml, ps-analyzer.yml, gitleaks.yml, cleanup.yml).
+- Pre-push validation standard: en-GB spelling enforced via `npx cspell "**"` (with alphabetically sorted `words` in `cspell.json`) and formatting enforced via `npx prettier --check "."`.

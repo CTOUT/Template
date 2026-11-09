@@ -10,12 +10,15 @@ Thank you for contributing to this project!
 
 ## Code & Documentation Standards
 
-- Use UK English (`en-GB`) for spelling.
-- Ensure all markdown files follow standard heading structures.
-- Run code formatters (`prettier --write .`) and spell check (`cspell`) before submitting PRs.
+- Use UK English (`en-GB`) for spelling; keep custom terms in `cspell.json` sorted alphabetically.
+- Ensure all markdown files follow standard heading structures (`.markdownlint.json`).
+- Before committing or pushing, run the exact CI validation commands in the repository root:
+  - `npx prettier --write .`
+  - `npx prettier --check "."`
+  - `npx cspell "**"`
 
 ## Submitting Pull Requests
 
 1. Keep pull requests focused on a single logical change.
-2. Ensure all CI/CD security and format checks pass.
+2. Ensure all CI/CD security, spellcheck, and format checks pass (`gh run list --limit 5`).
 3. Request review from project maintainers.

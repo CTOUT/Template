@@ -27,6 +27,7 @@
     "dependabot",
     "frontmatter",
     "gitleaks",
+    "handoff",
     "linters",
     "llms",
     "markdownlint",

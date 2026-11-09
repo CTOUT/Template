@@ -3,3 +3,10 @@ package-lock.json
 bin
 obj
 dist
+build
+output
+.terraform
+*.tf
+*.tfvars
+*.hcl
+.handoff_pending

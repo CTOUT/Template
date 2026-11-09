@@ -3,7 +3,8 @@
     Template-as-Code synchronization script for GitHub repositories.
 .DESCRIPTION
     Audits and synchronizes repository documentation, linter configs, GitHub Actions workflows,
-    discussion templates, copilot instructions, and cspell settings across repositories in d:\Repos\GitHub against the Template repository.
+    discussion templates, copilot instructions, package.json CI script parity, and cspell settings
+    across active CTOUT repositories in d:\Repos\GitHub against the Template repository.
 #>
 
 [CmdletBinding()]
@@ -19,11 +20,13 @@ Remove-Item env:GITHUB_TOKEN -ErrorAction SilentlyContinue
 
 $templateDir = $PSScriptRoot
 $workspaceRoot = Split-Path -Parent $templateDir
+$archivedRepos = @('vscode-copilot-sync')
 
 if (-not $TargetRepos -or $TargetRepos.Count -eq 0) {
-    $TargetRepos = Get-ChildItem -Path $workspaceRoot -Directory | 
+    $TargetRepos = Get-ChildItem -Path $workspaceRoot -Directory |
         Where-Object {
             $_.Name -ne 'Template' -and
+            $_.Name -notin $archivedRepos -and
             $_.Name -ne '.agents' -and
             $_.Name -ne '.vscode' -and
             $_.Name -ne 'scratch' -and
@@ -40,20 +43,19 @@ Write-Host "Target Repositories ($($TargetRepos.Count)): $($TargetRepos -join ',
 if ($DryRun) { Write-Host "[DRY RUN MODE ENABLED]" -ForegroundColor Yellow }
 Write-Host ""
 
-# Files to sync unconditionally (linters & workflows)
+# Files to sync unconditionally (linters & editor configs)
 $syncConfigs = @(
     ".editorconfig",
     ".gitattributes",
     ".prettierrc",
-    ".prettierignore",
     ".markdownlint.json",
-    ".markdownlintignore",
-    "CITATION.cff"
+    ".markdownlintignore"
 )
 
-# Baseline docs to copy if missing
+# Baseline docs and ignore files to copy only if missing (preserves project-specific metadata)
 $baselineDocs = @(
     ".gitignore",
+    ".prettierignore",
     "CONTRIBUTING.md",
     "SECURITY.md",
     "CITATION.cff",
@@ -72,6 +74,8 @@ $workflows = @(
     ".github/workflows/spellcheck.yml",
     ".github/workflows/ps-analyzer.yml"
 )
+
+$templatePrettierIgnore = Get-Content (Join-Path $templateDir ".prettierignore") | Where-Object { $_.Trim() -ne '' }
 
 foreach ($repoName in $TargetRepos) {
     $repoPath = Join-Path $workspaceRoot $repoName
@@ -103,6 +107,21 @@ foreach ($repoName in $TargetRepos) {
                 Copy-Item -Path $src -Destination $dest -Force
             }
             Write-Host "  [CREATE] $file" -ForegroundColor Cyan
+        }
+    }
+
+    # 2.1 Merge baseline .prettierignore entries without overwriting stack-specific rules
+    $prettierIgnorePath = Join-Path $repoPath ".prettierignore"
+    if (Test-Path $prettierIgnorePath) {
+        $existingLines = @(Get-Content $prettierIgnorePath)
+        $missingLines = @($templatePrettierIgnore | Where-Object { $_ -notin $existingLines })
+        if ($missingLines.Count -gt 0) {
+            if (-not $DryRun) {
+                $updatedLines = $existingLines + $missingLines
+                $content = ($updatedLines -join "`n") + "`n"
+                [System.IO.File]::WriteAllText($prettierIgnorePath, $content)
+            }
+            Write-Host "  [MERGE] .prettierignore (+$($missingLines.Count) baseline entries)" -ForegroundColor Gray
         }
     }
 
@@ -215,6 +234,36 @@ foreach ($repoName in $TargetRepos) {
     }
     Write-Host "  [SYNC TAILORED] .github/dependabot.yml" -ForegroundColor Gray
 
+    # 6.1 Enforce package.json Prettier CI Script Parity
+    $pkgPath = Join-Path $repoPath "package.json"
+    if (Test-Path $pkgPath) {
+        try {
+            $pkgRaw = Get-Content $pkgPath -Raw
+            $pkgObj = $pkgRaw | ConvertFrom-Json
+            if ($pkgObj.scripts) {
+                $pkgChanged = $false
+                if ($pkgObj.scripts.PSObject.Properties['format'] -and $pkgObj.scripts.format -match 'prettier\s+--write\s+"\*\*/') {
+                    $pkgObj.scripts.format = "prettier --write ."
+                    $pkgChanged = $true
+                }
+                if ($pkgObj.scripts.PSObject.Properties['format:check'] -and $pkgObj.scripts.'format:check' -match 'prettier\s+--check\s+"\*\*/') {
+                    $pkgObj.scripts.'format:check' = "prettier --check ."
+                    $pkgChanged = $true
+                }
+                if ($pkgChanged) {
+                    if (-not $DryRun) {
+                        $pkgFormatted = ($pkgObj | ConvertTo-Json -Depth 10).Replace("`r`n", "`n") + "`n"
+                        [System.IO.File]::WriteAllText($pkgPath, $pkgFormatted)
+                        npx prettier --write "$pkgPath" 2>$null
+                    }
+                    Write-Host "  [STANDARDIZE] package.json format scripts aligned with CI ('.')" -ForegroundColor Cyan
+                }
+            }
+        } catch {
+            Write-Warning "  Failed to inspect package.json for ${repoName}: $_"
+        }
+    }
+
     # 7. CSpell Standardization (language en-GB and sorted words)
     $cspellPath = Join-Path $repoPath "cspell.json"
     if (-not (Test-Path $cspellPath)) {
@@ -263,7 +312,7 @@ foreach ($repoName in $TargetRepos) {
         }
     }
 
-    # 8. Apply Remote GitHub Settings (if -ApplyRemoteSettings flag passed)
+    # 9. Apply Remote GitHub Settings (if -ApplyRemoteSettings flag passed)
     if ($ApplyRemoteSettings) {
         Write-Host "  [REMOTE] Applying GitHub remote settings for CTOUT/${repoName}..." -ForegroundColor Yellow
         try {
